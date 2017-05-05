@@ -46,9 +46,10 @@ void MainWindow::connectToChip() {
 void MainWindow::sendPicture() {
     char* char_file_name = _file_name.toLocal8Bit().data();
     // send image
+    writeMessage(_socketId, "run");
     int n = sendImage(_socketId, char_file_name);
     if (n != -1) {
-        ui->logsText->appendPlainText("Sending of image successful");
+        ui->logsText->appendPlainText("\nSending of image successful");
     }
     _receiver_thread->start();
 }
