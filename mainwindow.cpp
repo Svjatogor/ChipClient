@@ -58,7 +58,7 @@ void MainWindow::sendPicture() {
     writeMessage(_socketId, "run");
     int n = sendImage(_socketId, char_file_name);
     if (n != -1) {
-        ui->logsText->appendPlainText("\nSending of image successful");
+        ui->logsText->appendPlainText("Sending of image successful");
     }
     _receiver_thread->start();
 }
@@ -68,6 +68,7 @@ void MainWindow::openPicture() {
     if (!_file_name.isEmpty()) {
         ui->runButton->setEnabled(true);
         showPicture(_file_name);
+        enabledTasks(true);
     }
 }
 
@@ -108,5 +109,12 @@ void MainWindow::setWidgetSettings(int current) {
         ui->verticalLayoutTasks->addWidget(image_widget);
         QPixmap img("start.png");
         image_widget->setPixmap(img);
+        enabledTasks(false);
     }
+}
+
+void MainWindow::enabledTasks(bool enabled) {
+    ui->groupBoxTasks->setEnabled(enabled);
+    ui->comboBoxModels->setEnabled(enabled);
+    ui->runButton->setEnabled(enabled);
 }

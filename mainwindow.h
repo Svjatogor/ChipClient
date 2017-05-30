@@ -29,6 +29,7 @@ public slots:
     void showPicture(QString file_name);
     void setComboBoxList();
     void setWidgetSettings(int);
+    void enabledTasks(bool enabled);
 
 private:
     Ui::MainWindow *ui;
