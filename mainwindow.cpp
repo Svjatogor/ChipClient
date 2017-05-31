@@ -55,15 +55,16 @@ void MainWindow::connectToChip() {
 void MainWindow::sendPicture() {
     char* char_file_name = _file_name.toLocal8Bit().data();
     char* conf_type;
-    char response[256] = "";
+    char response[256] = "Sending of image successful";
+    char command[256] = "yolo";
     if (ui->radioButtonDetect->isChecked()) {// detection command
         // send  command yolo
-        writeMessage(_socketId, "yolo");
-        readMessage(_socketId, response);
+        writeMessage(_socketId, command);
+        //readMessage(_socketId, response);
         // send image
         int n = sendImage(_socketId, char_file_name);
         if (n != -1) {
-            readMessage(_socketId, response);
+            //readMessage(_socketId, response);
             ui->logsText->appendPlainText(QString(response));
         }
         // send configuration type

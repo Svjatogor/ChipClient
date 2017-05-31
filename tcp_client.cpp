@@ -40,11 +40,11 @@ void closeSocket(int sock_id) {
 }
 
 int readMessage(int sock_id, char* buffer) {
-    int n = 0;
     bzero(buffer, 256);
-    while (strlen(buffer) == 0) {
-        n = recv(sock_id, buffer, 255, 0);
-    }
+    int n = 0;
+    int size_message = 0;
+    recv(sock_id, &size_message, sizeof(size_message), 0);
+    n = recv(sock_id, buffer, size_message, 0);
     if (n < 0) {
         return -1;
     }
@@ -52,8 +52,10 @@ int readMessage(int sock_id, char* buffer) {
 }
 
 int writeMessage(int sock_id, char* buffer) {
-    int count = strlen(buffer);
-    int n = send(sock_id,buffer, 255, 0);
+    int n = 0;
+    int size_message = strlen(buffer);
+    send(sock_id, &size_message, sizeof(size_message), 0);
+    n = send(sock_id, buffer, size_message, 0);
     if (n < 0) {
         return -1;
     }
@@ -67,7 +69,6 @@ int sendImage(int sock_id, char *file_name) {
     fseek(picture, 0, SEEK_END);
     size = ftell(picture);
     fseek(picture, 0, SEEK_SET);
-
     // send picture size
     int n = send(sock_id, &size, sizeof(size), 0);
     if (n < 0) {
@@ -84,7 +85,7 @@ int sendImage(int sock_id, char *file_name) {
         }
         bzero(send_buffer, sizeof(send_buffer));
     }
-
+    //fflush(stdout);         // make sure everything makes it to the output
     return n;
 }
 
@@ -115,4 +116,5 @@ void get_image(int sock_id, char* file_name) {
     image = fopen(file_name, "w");
     fwrite(image_bytes, 1, sizeof(image_bytes), image);
     fclose(image);
+    //fflush(stdout);         // make sure everything makes it to the output
 }
