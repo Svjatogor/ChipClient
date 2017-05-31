@@ -53,8 +53,7 @@ int readMessage(int sock_id, char* buffer) {
 
 int writeMessage(int sock_id, char* buffer) {
     int count = strlen(buffer);
-    int n = 0;
-    n = send(sock_id,buffer, 255, 0);
+    int n = send(sock_id,buffer, 255, 0);
     if (n < 0) {
         return -1;
     }
@@ -70,8 +69,7 @@ int sendImage(int sock_id, char *file_name) {
     fseek(picture, 0, SEEK_SET);
 
     // send picture size
-    int n = 0;
-    n = send(sock_id, &size, sizeof(size), 0);
+    int n = send(sock_id, &size, sizeof(size), 0);
     if (n < 0) {
         return -1;
     }
@@ -94,8 +92,7 @@ void get_image(int sock_id, char* file_name) {
     bzero(file_name, sizeof(file_name));
     strcpy(file_name, "predictions.png");
     int size;
-    int n = 0;
-    n = recv(sock_id, &size, sizeof(int), 0);
+    int n = recv(sock_id, &size, sizeof(int), 0);
     if (n < 0) {
         return;
     }

@@ -58,7 +58,7 @@ void MainWindow::sendPicture() {
     writeMessage(_socketId, "run");
     int n = sendImage(_socketId, char_file_name);
     if (n != -1) {
-        ui->logsText->appendPlainText("Sending of image successful");
+        ui->logsText->appendPlainText("\nSending of image successful");
     }
     _receiver_thread->start();
 }
