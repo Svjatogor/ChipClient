@@ -77,14 +77,14 @@ int sendImage(int sock_id, char *file_name) {
 
     // send picture as byte array
     char send_buffer[size];
-    while(!feof(picture)) {
+    //while(!feof(picture)) {
         fread(send_buffer, 1, sizeof(send_buffer), picture);
         n = send(sock_id, send_buffer, sizeof(send_buffer), 0);
         if (n < 0) {
             return -1;
         }
         bzero(send_buffer, sizeof(send_buffer));
-    }
+    //}
     //fflush(stdout);         // make sure everything makes it to the output
     return n;
 }

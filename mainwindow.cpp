@@ -60,11 +60,11 @@ void MainWindow::sendPicture() {
     if (ui->radioButtonDetect->isChecked()) {// detection command
         // send  command yolo
         writeMessage(_socketId, command);
-        //readMessage(_socketId, response);
+        readMessage(_socketId, response);
         // send image
         int n = sendImage(_socketId, char_file_name);
         if (n != -1) {
-            //readMessage(_socketId, response);
+            readMessage(_socketId, response);
             ui->logsText->appendPlainText(QString(response));
         }
         // send configuration type
