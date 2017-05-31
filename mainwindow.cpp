@@ -54,13 +54,23 @@ void MainWindow::connectToChip() {
 
 void MainWindow::sendPicture() {
     char* char_file_name = _file_name.toLocal8Bit().data();
-    // send image
-    writeMessage(_socketId, "run");
-    int n = sendImage(_socketId, char_file_name);
-    if (n != -1) {
-        ui->logsText->appendPlainText("\nSending of image successful");
+    char* conf_type;
+    char response[256] = "";
+    if (ui->radioButtonDetect->isChecked()) {// detection command
+        // send  command yolo
+        writeMessage(_socketId, "yolo");
+        readMessage(_socketId, response);
+        // send image
+        int n = sendImage(_socketId, char_file_name);
+        if (n != -1) {
+            readMessage(_socketId, response);
+            ui->logsText->appendPlainText(QString(response));
+        }
+        // send configuration type
+        conf_type = ui->comboBoxModels->currentText().toLocal8Bit().data();
+        writeMessage(_socketId, conf_type);
+        _receiver_thread->start();
     }
-    _receiver_thread->start();
 }
 
 void MainWindow::openPicture() {
@@ -100,6 +110,7 @@ void MainWindow::setComboBoxList() {
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
+    writeMessage(_socketId, "exit");
     closeSocket(_socketId);
 }
 
