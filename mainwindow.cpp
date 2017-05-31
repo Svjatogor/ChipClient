@@ -101,7 +101,6 @@ void MainWindow::setComboBoxList() {
 
 void MainWindow::closeEvent(QCloseEvent *event) {
     closeSocket(_socketId);
-    writeMessage(_socketId, "exit");
 }
 
 void MainWindow::setWidgetSettings(int current) {
