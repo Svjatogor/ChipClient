@@ -27,7 +27,6 @@ public slots:
     void openPicture();
     void appendToLog(QString message);
     void showPicture(QString file_name);
-    void setComboBoxList();
     void setWidgetSettings(int);
     void enabledTasks(bool enabled);
 

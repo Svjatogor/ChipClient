@@ -13,13 +13,13 @@ int connectToServer() {
     struct hostent *server;
 
     char buffer[256];
-    portno = atoi("224");
+    portno = atoi("222");
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) {
         return -1;
     }
-    //server = gethostbyname("localhost");
-    server = gethostbyname("192.168.0.9");
+    server = gethostbyname("localhost");
+    //server = gethostbyname("192.168.0.3");
     if (server == NULL) {
         fprintf(stderr,"ERROR, no such host\n");
         exit(0);

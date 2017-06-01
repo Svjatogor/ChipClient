@@ -17,13 +17,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->connectButton, SIGNAL(clicked(bool)), this, SLOT(connectToChip()));
     connect(ui->selectImgButton, SIGNAL(clicked(bool)), this, SLOT(openPicture()));
     connect(ui->runButton, SIGNAL(clicked(bool)), this, SLOT(sendPicture()));
-    connect(ui->radioButtonClassif, SIGNAL(toggled(bool)), this, SLOT(setComboBoxList()));
-    connect(ui->radioButtonDetect, SIGNAL(toggled(bool)), this, SLOT(setComboBoxList()));
     connect(ui->stackedWidget, SIGNAL(currentChanged(int)), this, SLOT(setWidgetSettings(int)));
 
     image_widget = new ImageLabel(this);
     image_widget->setMinimumSize(300, 200);
-    ui->radioButtonDetect->setChecked(true);
 }
 
 MainWindow::~MainWindow() {
@@ -57,21 +54,16 @@ void MainWindow::sendPicture() {
     char* conf_type;
     char response[256] = "Sending of image successful";
     char command[256] = "yolo";
-    if (ui->radioButtonDetect->isChecked()) {// detection command
-        // send  command yolo
-        writeMessage(_socketId, command);
+    // send  command yolo
+    writeMessage(_socketId, command);
+    readMessage(_socketId, response);
+    // send image
+    int n = sendImage(_socketId, char_file_name);
+    if (n != -1) {
         readMessage(_socketId, response);
-        // send image
-        int n = sendImage(_socketId, char_file_name);
-        if (n != -1) {
-            readMessage(_socketId, response);
-            ui->logsText->appendPlainText(QString(response));
-        }
-        // send configuration type
-        conf_type = ui->comboBoxModels->currentText().toLocal8Bit().data();
-        writeMessage(_socketId, conf_type);
-        _receiver_thread->start();
+        ui->logsText->appendPlainText(QString(response));
     }
+    _receiver_thread->start();
 }
 
 void MainWindow::openPicture() {
@@ -98,18 +90,6 @@ void MainWindow::showPicture(QString file_name) {
     image_widget->setPixmap(img);
 }
 
-void MainWindow::setComboBoxList() {
-    ui->comboBoxModels->clear();
-    QStringList list_items;
-    if (ui->radioButtonClassif->isChecked()) {
-        list_items << "AlexNet" << "Darknet Reference" << "VGG-16" << "Darknet19";
-    }
-    else {
-        list_items << "YOLOv2" << "YOLOv2 544x544" << "Tiny YOLO";
-    }
-    ui->comboBoxModels->insertItems(0, list_items);
-}
-
 void MainWindow::closeEvent(QCloseEvent *event) {
     writeMessage(_socketId, "exit");
     closeSocket(_socketId);
@@ -125,7 +105,5 @@ void MainWindow::setWidgetSettings(int current) {
 }
 
 void MainWindow::enabledTasks(bool enabled) {
-    ui->groupBoxTasks->setEnabled(enabled);
-    ui->comboBoxModels->setEnabled(enabled);
     ui->runButton->setEnabled(enabled);
 }
