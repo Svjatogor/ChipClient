@@ -6,15 +6,16 @@ SocketWorker::SocketWorker(int s) {
 }
 
 void SocketWorker::receivingMessages() {
-    // get parsing info
     char message[256];
     int n = -1;
+     // get parsing info
     n = readMessage(_sockId, message);
     if (n != -1) {
         emit messageReceived(QString(message));
     }
     else {
         emit messageReceived("");
+        return;
     }
     // get weights info
     n = readMessage(_sockId, message);
@@ -23,6 +24,7 @@ void SocketWorker::receivingMessages() {
     }
     else {
         emit messageReceived("");
+        return;
     }
     // load imnage info
     n = readMessage(_sockId, message);
@@ -31,6 +33,7 @@ void SocketWorker::receivingMessages() {
     }
     else {
         emit messageReceived("");
+        return;
     }
     // start predict
     n = readMessage(_sockId, message);
@@ -39,6 +42,7 @@ void SocketWorker::receivingMessages() {
     }
     else {
         emit messageReceived("");
+        return;
     }
     // predict info
     n = readMessage(_sockId, message);
@@ -47,6 +51,7 @@ void SocketWorker::receivingMessages() {
     }
     else {
         emit messageReceived("");
+        return;
     }
     // get image
     emit finished("");

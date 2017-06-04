@@ -11,6 +11,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->stackedWidget->setCurrentIndex(0);
     ui->logsText->setReadOnly(true);
     setWindowTitle("Chip Vision");
+    _predict_done = true;
 
     connect(ui->connectButton, SIGNAL(clicked(bool)), this, SLOT(connectToChip()));
     connect(ui->selectImgButton, SIGNAL(clicked(bool)), this, SLOT(openPicture()));
@@ -27,7 +28,6 @@ void MainWindow::connectToChip() {
     image_widget = new ImageLabel(this);
     image_widget->setMinimumSize(300, 200);
     _receiver_thread = new QThread;
-
     _socketId = connectToServer();
     if (_socketId != -1) {
         _worker = new SocketWorker(_socketId);
@@ -46,6 +46,7 @@ void MainWindow::connectToChip() {
         else {
             ui->logsText->appendPlainText("Server is not available");
         }
+        _predict_done = true;
     }
     else {
         QMessageBox::warning(this, "Error connection",  "Error connect to server!");
@@ -53,8 +54,8 @@ void MainWindow::connectToChip() {
 }
 
 void MainWindow::sendPicture() {
+    _predict_done = false;
     char* char_file_name = _file_name.toLocal8Bit().data();
-    char* conf_type;
     char response[256] = "Sending of image successful";
     char command[256] = "yolo";
     // send  command yolo
@@ -65,6 +66,8 @@ void MainWindow::sendPicture() {
     if (n != -1) {
         readMessage(_socketId, response);
         ui->logsText->appendPlainText(QString(response));
+        ui->runButton->setEnabled(false);
+        ui->selectImgButton->setEnabled(false);
     }
     _receiver_thread->start();
 }
@@ -96,6 +99,9 @@ bool MainWindow::showPicture(QString file_name) {
         bzero(filename, sizeof(filename));
         getImage(_socketId, filename);
         file_name = QString(filename);
+        _predict_done = true;
+        ui->runButton->setEnabled(true);
+        ui->selectImgButton->setEnabled(true);
     }
     QPixmap img(file_name);
     if (img.size().height() == 0 && img.size().width() == 0) {
@@ -109,8 +115,15 @@ bool MainWindow::showPicture(QString file_name) {
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
-    writeMessage(_socketId, "exit");
-    closeSocket(_socketId);
+    if (_predict_done) {
+        writeMessage(_socketId, "exit");
+        closeSocket(_socketId);
+        event->accept();
+    }
+    else {
+        QMessageBox::warning(this, "Server", "Server running");
+        event->ignore();
+    }
 }
 
 void MainWindow::setWidgetSettings(int current) {
@@ -127,7 +140,6 @@ void MainWindow::enabledTasks(bool enabled) {
 }
 
 void MainWindow::errorExit() {
-    delete _receiver_thread;
     delete image_widget;
     ui->stackedWidget->setCurrentIndex(0);
 }

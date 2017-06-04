@@ -39,6 +39,7 @@ private:
     QThread* _receiver_thread;
     void closeEvent(QCloseEvent *event);
     ImageLabel* image_widget;
+    bool _predict_done;
 };
 
 #endif // MAINWINDOW_H
