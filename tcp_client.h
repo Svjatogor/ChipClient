@@ -13,5 +13,5 @@ void closeSocket(int sock_id);
 int readMessage(int sock_id, char* buffer);
 int writeMessage(int sock_id, char* buffer);
 int sendImage(int sock_id, char* file_name);
-void get_image(int sock_id, char* file_name);
+int getImage(int sock_id, char* file_name);
 #endif // TCP_CLIENT_H

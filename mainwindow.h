@@ -26,9 +26,10 @@ public slots:
     void sendPicture();
     void openPicture();
     void appendToLog(QString message);
-    void showPicture(QString file_name);
+    bool showPicture(QString file_name);
     void setWidgetSettings(int);
     void enabledTasks(bool enabled);
+    void errorExit();
 
 private:
     Ui::MainWindow *ui;

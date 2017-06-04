@@ -13,7 +13,7 @@ int connectToServer() {
     struct hostent *server;
 
     char buffer[256];
-    portno = atoi("222");
+    portno = atoi("1245");
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) {
         return -1;
@@ -45,7 +45,7 @@ int readMessage(int sock_id, char* buffer) {
     int size_message = 0;
     recv(sock_id, &size_message, sizeof(size_message), 0);
     n = recv(sock_id, buffer, size_message, 0);
-    if (n < 0) {
+    if (n <= 0) {
         return -1;
     }
     return n;
@@ -56,7 +56,7 @@ int writeMessage(int sock_id, char* buffer) {
     int size_message = strlen(buffer);
     send(sock_id, &size_message, sizeof(size_message), 0);
     n = send(sock_id, buffer, size_message, 0);
-    if (n < 0) {
+    if (n <= 0) {
         return -1;
     }
     return n;
@@ -71,7 +71,7 @@ int sendImage(int sock_id, char *file_name) {
     fseek(picture, 0, SEEK_SET);
     // send picture size
     int n = send(sock_id, &size, sizeof(size), 0);
-    if (n < 0) {
+    if (n <= 0) {
         return -1;
     }
 
@@ -80,7 +80,7 @@ int sendImage(int sock_id, char *file_name) {
     //while(!feof(picture)) {
         fread(send_buffer, 1, sizeof(send_buffer), picture);
         n = send(sock_id, send_buffer, sizeof(send_buffer), 0);
-        if (n < 0) {
+        if (n <= 0) {
             return -1;
         }
         bzero(send_buffer, sizeof(send_buffer));
@@ -89,13 +89,13 @@ int sendImage(int sock_id, char *file_name) {
     return n;
 }
 
-void get_image(int sock_id, char* file_name) {
+int getImage(int sock_id, char* file_name) {
     bzero(file_name, sizeof(file_name));
     strcpy(file_name, "predictions.png");
     int size;
     int n = recv(sock_id, &size, sizeof(int), 0);
-    if (n < 0) {
-        return;
+    if (n <= 0) {
+        return -1;
     }
     printf("Size image: %d\nReading image...\n", size);
     char image_bytes[size];
@@ -104,8 +104,8 @@ void get_image(int sock_id, char* file_name) {
     while (size > 0) {
         n = recv(sock_id, point, size, 0);
         point += n;
-        if (n < 0) {
-            return;
+        if (n <= 0) {
+            return -1;
         }
         size -= n;
     }
@@ -116,5 +116,6 @@ void get_image(int sock_id, char* file_name) {
     image = fopen(file_name, "w");
     fwrite(image_bytes, 1, sizeof(image_bytes), image);
     fclose(image);
+    return n;
     //fflush(stdout);         // make sure everything makes it to the output
 }

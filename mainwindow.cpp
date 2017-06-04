@@ -12,15 +12,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->logsText->setReadOnly(true);
     setWindowTitle("Chip Vision");
 
-    _receiver_thread = new QThread;
-
     connect(ui->connectButton, SIGNAL(clicked(bool)), this, SLOT(connectToChip()));
     connect(ui->selectImgButton, SIGNAL(clicked(bool)), this, SLOT(openPicture()));
     connect(ui->runButton, SIGNAL(clicked(bool)), this, SLOT(sendPicture()));
     connect(ui->stackedWidget, SIGNAL(currentChanged(int)), this, SLOT(setWidgetSettings(int)));
-
-    image_widget = new ImageLabel(this);
-    image_widget->setMinimumSize(300, 200);
 }
 
 MainWindow::~MainWindow() {
@@ -29,6 +24,10 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::connectToChip() {
+    image_widget = new ImageLabel(this);
+    image_widget->setMinimumSize(300, 200);
+    _receiver_thread = new QThread;
+
     _socketId = connectToServer();
     if (_socketId != -1) {
         _worker = new SocketWorker(_socketId);
@@ -40,12 +39,16 @@ void MainWindow::connectToChip() {
         connect(_worker, SIGNAL(finished(QString)), this, SLOT(showPicture(QString)));
 
         char message[256];
-        ui->stackedWidget->setCurrentIndex(1);
-        readMessage(_socketId, message);
-        ui->logsText->appendPlainText("Connection is " + QString(message));
+        if (readMessage(_socketId, message) != -1) {
+            ui->stackedWidget->setCurrentIndex(1);
+            ui->logsText->appendPlainText("Connection is " + QString(message));
+        }
+        else {
+            ui->logsText->appendPlainText("Server is not available");
+        }
     }
     else {
-        QMessageBox::warning(this, "Error connection",  "Error connect to server");
+        QMessageBox::warning(this, "Error connection",  "Error connect to server!");
     }
 }
 
@@ -67,27 +70,42 @@ void MainWindow::sendPicture() {
 }
 
 void MainWindow::openPicture() {
-    _file_name = QFileDialog::getOpenFileName(this, "Image", QDir::homePath(), "Images (*.jpg *.png)");
-    if (!_file_name.isEmpty()) {
-        ui->runButton->setEnabled(true);
-        showPicture(_file_name);
-        enabledTasks(true);
+    QString file_name = QFileDialog::getOpenFileName(this, "Image", QDir::homePath(), "Images (*.jpg *.png)");
+    if (!file_name.isEmpty()) {
+        if (showPicture(file_name)){
+            _file_name = file_name;
+            ui->runButton->setEnabled(true);
+            enabledTasks(true);
+        }
     }
 }
 
 void MainWindow::appendToLog(QString message) {
-    ui->logsText->appendPlainText(message);
+    if (message.isEmpty()) {
+        ui->logsText->appendPlainText("Error connect to server!");
+        errorExit();
+    }
+    else {
+        ui->logsText->appendPlainText(message);
+    }
 }
 
-void MainWindow::showPicture(QString file_name) {
+bool MainWindow::showPicture(QString file_name) {
     if (file_name.isEmpty()) {
         char filename[256];
         bzero(filename, sizeof(filename));
-        get_image(_socketId, filename);
+        getImage(_socketId, filename);
         file_name = QString(filename);
     }
     QPixmap img(file_name);
-    image_widget->setPixmap(img);
+    if (img.size().height() == 0 && img.size().width() == 0) {
+        QMessageBox::warning(this, "Open image error", "Wrong image format");
+        return false;
+    }
+    else {
+        image_widget->setPixmap(img);
+        return true;
+    }
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -106,4 +124,10 @@ void MainWindow::setWidgetSettings(int current) {
 
 void MainWindow::enabledTasks(bool enabled) {
     ui->runButton->setEnabled(enabled);
+}
+
+void MainWindow::errorExit() {
+    delete _receiver_thread;
+    delete image_widget;
+    ui->stackedWidget->setCurrentIndex(0);
 }
