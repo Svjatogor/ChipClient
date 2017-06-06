@@ -18,7 +18,8 @@ int connectToServer() {
     if (sockfd < 0) {
         return -1;
     }
-    server = gethostbyname("10.42.0.97");
+    //server = gethostbyname("10.42.0.97");
+    server = gethostbyname("localhost");
     if (server == NULL) {
         fprintf(stderr,"ERROR, no such host\n");
         exit(0);
